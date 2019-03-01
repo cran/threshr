@@ -6,7 +6,8 @@
 \usage{
 \method{predict}{ithresh}(object, npy = NULL, n_years = 100,
   which_u = c("best", "all"), which_v = 1L, u_prior = rep(1,
-  length(object$u_vec)), type = c("p", "d", "q", "i", "r"), x = NULL, ...)
+  length(object$u_vec)), type = c("p", "d", "q", "i", "r"), x = NULL,
+  ...)
 }
 \arguments{
 \item{object}{An object of class "ithresh", a result of a call to
@@ -137,8 +138,8 @@ The function \code{\link[revdbayes]{predict.evpost}} is used to
 #   50 suggested by Jonathan and Ewans (2013).
 
 # Gulf of Mexico significant wave heights, default priors.
-u_vec_gom <- quantile(gom, probs = seq(0, 0.95, by = 0.05))
-gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 4)
+u_vec_gom <- quantile(gom, probs = seq(0, 0.9, by = 0.05))
+gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 3)
 
 # Note: gom_cv$npy contains the correct value of npy (it was set in the
 #       call to ithresh, via attr(gom, "npy").
