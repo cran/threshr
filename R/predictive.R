@@ -2,7 +2,7 @@
 
 #' Predictive inference for the largest value observed in N years.
 #'
-#' \code{predict} method for class "ithresh".  Predictive inferences can
+#' \code{predict} method for class \code{"ithresh"}.  Predictive inferences can
 #' either be based on a \emph{single training threshold} or using a weighted
 #' average of inferences over \emph{multiple training thresholds}.  A single
 #' threshold may chosen to be the best performing threshold, as judged by the
@@ -12,7 +12,7 @@
 #' training thresholds.  By default all thresholds are given the same
 #' prior probability but the user can specify their own prior.
 #'
-#' @param object An object of class "ithresh", a result of a call to
+#' @param object An object of class \code{"ithresh"}, a result of a call to
 #'   \code{\link{ithresh}}.
 #' @param npy A numeric scalar. The mean number of observations per year
 #'   of data, after excluding any missing values, i.e. the number of
@@ -69,19 +69,26 @@
 #'   \item "p" for the predictive distribution function,
 #'   \item "d" for the predictive density function,
 #'   \item "q" for the predictive quantile function,
-#'   \item "i" for predictive intervals,
+#'   \item "i" for predictive intervals (see \code{...} to set \code{level}),
 #'   \item "r" for random generation from the predictive distribution.
 #' }
 #'   If \code{which_u = "all"} then only \code{type = "p"} or \code{type = "d"}
 #'   are allowed.
+#' @param hpd A logical scalar.  The argument \code{hpd} of
+#'   \code{\link[revdbayes]{predict.evpost}}. Only relevant if
+#'   \code{type = "i"}.
 #' @param x A numeric vector.  The argument \code{x} of
 #'   \code{\link[revdbayes]{predict.evpost}}.  In the current context this
 #'   must be a vector (not a matrix, as suggested by the documentation of
 #'   \code{\link[revdbayes]{predict.evpost}}).  If \code{x} is not supplied
 #'   then a default value is set within
 #'   \code{\link[revdbayes]{predict.evpost}}.
-#' @param ... Additional optional arguments. At present no optional arguments
-#'   are used.
+#' @param ... Additional arguments to be passed to
+#'   \code{\link[revdbayes]{predict.evpost}}.  In particular:
+#'   \code{level}, which can be used to set (multiple) levels
+#'   for predictive intervals when \code{type = "i"};
+#'   \code{lower_tail} (relevant when \code{type = "p"} or \code{"q"}) and
+#'   \code{log} (relevant when \code{type = "d"}).
 #' @details The function \code{\link[revdbayes]{predict.evpost}} is used to
 #'   perform predictive based on the binomial-GP posterior sample generated
 #'   using a given training threshold.  For mathematical details of the
@@ -96,8 +103,11 @@
 #'   \code{which_v} and the index \code{best_u} in
 #'   \code{u_vec = object$u_vec} of the best training threshold based on
 #'   the value of \code{which_v}.
+#'   It also contains the value of the Box-Cox transformation parameter
+#'   \code{lambda}.  This will always be equal to 1 if \code{object} was
+#'   returned from \code{ithresh}.
 #'
-#'   If \code{which_u == "all"} then
+#'   If \code{which_u = "all"} then
 #' \itemize{
 #'   \item the list also contains the \emph{posterior threshold weights}
 #'     in component \code{post_thresh_wts}
@@ -135,6 +145,11 @@
 #' best_d <- predict(gom_cv, type = "d", n_years = c(100, 1000))
 #' plot(best_d)
 #'
+#' # Predictive intervals
+#' best_i <- predict(gom_cv, n_years = c(100, 1000), type = "i", hpd = TRUE,
+#'                   level = c(95, 99))
+#' plot(best_i, which_int = "both")
+#'
 #' # See which threshold was used
 #' summary(gom_cv)
 #'
@@ -156,14 +171,29 @@
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{http://dx.doi.org/10.1111/rssc.12159}
+#'   \url{https://doi.org/10.1111/rssc.12159}
 #' @export
 predict.ithresh <- function(object, npy = NULL, n_years = 100,
                             which_u = c("best", "all"), which_v = 1L,
                             u_prior = rep(1, length(object$u_vec)),
-                            type = c("p", "d", "q", "i", "r"), x = NULL, ...) {
+                            type = c("p", "d", "q", "i", "r"), hpd = FALSE,
+                            x = NULL, ...) {
   if (!inherits(object, "ithresh")) {
-    stop("object must be of class ''ithresh'', produced by ithresh()")
+    stop("object must be of class ''ithresh''")
+  }
+  # Check that which_u and n_years are compatible
+  if (which_u[1] == "all" & length(n_years) > 1){
+    stop("If which = \"all\" then n_years must have length 1")
+  }
+  # From which function was object returned?
+  if (is.null(object$lambda)) {
+    fn_object <- "ithresh"
+  } else {
+    fn_object <- "choose_lambda"
+  }
+  # If object was returned from choose_lambda() then we use object$lambda
+  if (fn_object == "choose_lambda") {
+    lambda <- object$lambda
   }
   # Numbers of training and validation thresholds
   n_u <- length(object$u_vec)
@@ -223,8 +253,11 @@ predict.ithresh <- function(object, npy = NULL, n_years = 100,
     evpost_obj$sim_vals <- object$sim_vals[which_rows, 2:3]
     evpost_obj$thresh <- object$u_vec[best_u]
     for_predict_evpost <- list(object = evpost_obj, n_years = n_years,
-                               npy = npy, type = type, x = x)
-    ret_obj <- do.call(revdbayes:::predict.evpost, for_predict_evpost)
+                               npy = npy, type = type, hpd = hpd, x = x, ...)
+    # predict is revdbayes::predict.evpost
+#    ret_obj <- do.call(revdbayes::predict.evpost, for_predict_evpost)
+    class(for_predict_evpost) <- "evpost"
+    ret_obj <- do.call(predict, for_predict_evpost)
   }
   if (which_u == "all") {
     # All thresholds
@@ -245,8 +278,11 @@ predict.ithresh <- function(object, npy = NULL, n_years = 100,
     evpost_obj$sim_vals <- object$sim_vals[which_rows, 2:3]
     evpost_obj$thresh <- object$u_vec[best_u]
     for_predict_evpost <- list(object = evpost_obj, n_years = n_years,
-                               npy = npy, type = type, x = x)
-    ret_obj <- do.call(revdbayes:::predict.evpost, for_predict_evpost)
+                               npy = npy, type = type, hpd = hpd, x = x, ...)
+    # predict is revdbayes::predict.evpost
+#    ret_obj <- do.call(revdbayes::predict.evpost, for_predict_evpost)
+    class(for_predict_evpost) <- "evpost"
+    ret_obj <- do.call(predict, for_predict_evpost)
     x_vals <- ret_obj$x
     others <- (1:n_t)[-best_u]
     # Create matrix: y_val
@@ -259,8 +295,12 @@ predict.ithresh <- function(object, npy = NULL, n_years = 100,
       evpost_obj$sim_vals <- object$sim_vals[which_rows, 2:3]
       evpost_obj$thresh <- object$u_vec[i]
       for_predict_evpost <- list(object = evpost_obj, n_years = n_years,
-                                 npy = npy, type = type, x = x_vals)
-      temp <- do.call(revdbayes:::predict.evpost, for_predict_evpost)
+                                 npy = npy, type = type, hpd = hpd, x = x_vals,
+                                 ...)
+      # predict is revdbayes::predict.evpost
+#      temp <- do.call(revdbayes::predict.evpost, for_predict_evpost)
+      class(for_predict_evpost) <- "evpost"
+      temp <- do.call(predict, for_predict_evpost)
       y_val[, 1 + i] <- temp$y
     }
     # Row-wise mean weighted by the posterior threshold weights
@@ -274,6 +314,35 @@ predict.ithresh <- function(object, npy = NULL, n_years = 100,
   ret_obj$which_v <- which_v
   ret_obj$v_vec <- object$v_vec
   ret_obj$best_u <- return_best_u
+  # If object was returned from choose_lambda() then transform
+  # back to the original scale
+  if (fn_object == "choose_lambda") {
+    # Add the value of lambda
+    ret_obj$lambda <- lambda
+    if (ret_obj$type == "p") {
+      ret_obj$x <- inv_bc(ret_obj$x, lambda)
+    }
+    if (ret_obj$type == "d") {
+      # Transform the ordinates
+      ret_obj$x <- inv_bc(ret_obj$x, lambda)
+      # Transformed density, using Jacobian based on untransformed ordinates
+      # Code so this works when which_u = "all" and so ret_obj$y is a matrix
+      ret_obj$y <- ret_obj$y * as.vector(ret_obj$x ^ (lambda - 1))
+    }
+    if (ret_obj$type == "q" || ret_obj$type == "r") {
+      ret_obj$y <- inv_bc(ret_obj$y, lambda)
+    }
+    if (ret_obj$type == "i") {
+      temp <- apply(ret_obj$long[, c("lower", "upper"), drop = FALSE], 2,
+                   inv_bc, lambda = lambda)
+      ret_obj$long[, c("lower", "upper")] <- temp
+      if (hpd) {
+        temp <- apply(ret_obj$short[, c("lower", "upper"), drop = FALSE], 2,
+                      inv_bc, lambda = lambda)
+        ret_obj$short[, c("lower", "upper")] <- temp
+      }
+    }
+  }
   class(ret_obj) <- "ithreshpred"
   return(invisible(ret_obj))
 }
@@ -287,7 +356,7 @@ post_thresh_weights <- function(x, which_v = 1, u_prior = NULL) {
   #   x       : A object of class "ithresh" returned by ithresh.
   #   which_v : A numeric scalar.  Indicates which validation threshold,
   #             i.e. which element of x$v_vec and hence which column of
-  #             x$pred_perf containing the measures of predictiv performance,
+  #             x$pred_perf containing the measures of predictive performance,
   #             is used.
   #   u_prior : A numeric vector.  Prior probabilities for the thresholds
   #             in u_vec.  If this is NULL then it is set to a vector of
@@ -323,4 +392,3 @@ post_thresh_weights <- function(x, which_v = 1, u_prior = NULL) {
   ptw <- ptw / sum(ptw)
   return(ptw)
 }
-

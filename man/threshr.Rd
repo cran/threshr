@@ -3,7 +3,6 @@
 \docType{package}
 \name{threshr}
 \alias{threshr}
-\alias{threshr-package}
 \title{threshr: Threshold Selection and Uncertainty for Extreme Value Analysis}
 \description{
 Provides functions for the selection of extreme value threshold.
@@ -32,7 +31,7 @@ Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   with application to ocean storm severity.
   \emph{Journal of the Royal Statistical Society Series C: Applied
   Statistics}, \strong{66}(1), 93-120.
-  \url{http://dx.doi.org/10.1111/rssc.12159}
+  \url{https://doi.org/10.1111/rssc.12159}
 }
 \seealso{
 The packages \code{\link[revdbayes]{revdbayes}} and

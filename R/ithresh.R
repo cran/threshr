@@ -43,7 +43,7 @@
 #'     See the \strong{revdbayes} vignette
 #'     \href{https://cran.r-project.org/package=revdbayes}{Faster simulation
 #'     using revdbayes} for information about creating
-#'     a pointer to a C++ function. See also the \strong{Examples} section.
+#'     a pointer to a C++ function.  See also the \strong{Examples} section.
 #'
 #'     If the user supplies and R function then \code{\link{rpost}} will be
 #'     used for posterior simulation, rather than (the faster)
@@ -55,10 +55,11 @@
 #'     \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}}.
 #'   \item {\code{h_prior}} {A \emph{list} of further arguments
 #'     (hyperparameters) for the GP prior specified in \code{prior}.}
-#'   \item {\code{bin_prior}} {A character scalar that chooses an in-built
-#'     prior for the threshold exceedance probability \eqn{p}, to be passed to
-#'     the \strong{revdbayes} function \code{\link[revdbayes]{set_bin_prior}}.
-#'     only relevant if \code{prior == "beta"}.
+#'   \item {\code{bin_prior}} {A prior for the threshold exceedance probability
+#'     \eqn{p} to be passed to the \strong{revdbayes} function
+#'     \code{\link[revdbayes]{set_bin_prior}}.
+#'     Can either be a character scalar that chooses an in-built prior,
+#'     or a user_supplied R function.
 #'
 #'     Default: \code{prior = "jeffreys"}, i.e. Beta(1/2, 1/2).}
 #'   \item {\code{h_bin_prior}} {A \emph{list} of further arguments
@@ -139,8 +140,9 @@
 #'       \code{n} x \code{length(u_vec)} rows.  The \eqn{j}th block of
 #'       \code{n} rows contains in columns 1-3 the posterior samples of
 #'       the threshold exceedance probability, the GP scale
-#'       parameter and the GP shape parameter respectively, and in
-#'       column 4 the value of \eqn{j}.
+#'       parameter and the GP shape parameter respectively,
+#'       based on training threshold \code{u_vec[i]},
+#'       and in column 4 the value of \eqn{j}.
 #'     \item{\code{n}:} A numeric scalar.  The value of \code{n}.
 #'     \item{\code{npy}:} A numeric scalar.  The value of \code{npy}.
 #'     \item{\code{data}:} The argument \code{data} to \code{ithresh}
@@ -153,6 +155,7 @@
 #'       \code{\link[revdbayes]{rpost_rcpp}}
 #'       (or \code{\link[revdbayes]{rpost}}) was called, including
 #'       any user-supplied arguments to these functions.
+#'     \item{\code{call:}} The call to \code{ithresh}.
 #'   }
 #' @seealso \code{\link{plot.ithresh}} for the S3 plot method for objects of
 #'   class \code{ithresh}.
@@ -173,7 +176,7 @@
 #' @examples
 #' # Note:
 #' # 1. Smoother plots result from making n larger than the default n = 1000.
-#' # 2. In the examples below validation thresholds rather higher than is
+#' # 2. In some examples below validation thresholds rather higher than is
 #' #    advisable have been used, with far fewer excesses than the minimum of
 #' #    50 suggested by Jonathan and Ewans (2013).
 #'
@@ -205,32 +208,38 @@
 #'   }
 #'   return(-log(pars[1]) - a * pars[2])
 #' }
+#' user_bin_prior <- function(p, ab) {
+#'   return(stats::dbeta(p, shape1 = ab[1], shape2 = ab[2], log = TRUE))
+#' }
 #' gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 2, prior = user_prior,
-#'                   h_prior = list(a = 0.6))
+#'                   h_prior = list(a = 0.6), bin_prior = user_bin_prior,
+#'                   h_bin_prior = list(ab = c(1 / 2, 1 / 2)))
 #' }
 #' ## Setting a user-defined (log-)prior (pointer to a) C++ function ----------
 #' # We make use of a C++ function and function create_prior_xptr() to create
 #' # the required pointer from the revdbayes package
 #'
-#' prior_ptr <- revdbayes:::create_prior_xptr("gp_flat")
+#' prior_ptr <- revdbayes::create_prior_xptr("gp_flat")
 #' gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 2, prior = prior_ptr,
 #'                   h_prior = list(min_xi = -1))
 #' @references Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
 #'   Bayesian extreme value analyses using reference priors
 #'   \emph{Statistica Sinica}, \strong{26}(2), 721--743
-#'   \url{http://dx.doi.org/10.5705/ss.2014.034}.
+#'   \url{https://doi.org/10.5705/ss.2014.034}.
 #' @references Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{http://dx.doi.org/10.1111/rssc.12159}
+#'   \url{https://doi.org/10.1111/rssc.12159}
 #' @references Jonathan, P. and Ewans, K. (2013) Statistical modelling
 #'   of extreme ocean environments for marine design : a review.
 #'   \emph{Ocean Engineering}, \strong{62}, 91-109.
-#'   \url{http://dx.doi.org/10.1016/j.oceaneng.2013.01.004}
+#'   \url{https://doi.org/10.1016/j.oceaneng.2013.01.004}
 #' @export
 ithresh <- function(data, u_vec, ..., n_v = 1, npy = NULL, use_rcpp = TRUE) {
+  # Record the call for later use
+  Call <- match.call()
   # Store npy (if it has been supplied)
   if (!is.null(attr(data, "npy"))) {
     return_npy <- attr(data, "npy")
@@ -276,6 +285,7 @@ ithresh <- function(data, u_vec, ..., n_v = 1, npy = NULL, use_rcpp = TRUE) {
     temp$npy <- return_npy
   }
   temp$data <- data
+  temp$call <- Call
   class(temp) <- "ithresh"
   return(temp)
 }
@@ -372,28 +382,25 @@ cv_fn <- function(data, u_vec, v_vec, n_u, n_v, use_rcpp, ...) {
                                                      thresh = u))),
                 silent = TRUE)
     if (inherits(temp, "try-error")) {
-      if (is.null(cv_control$trans) || cv_control == "none") {
-        try_other_trans <- "BC"
+      if (is.null(for_post$trans) || for_post$trans == "none") {
+        for_post$trans <- "BC"
       } else {
-        try_other_trans <- "none"
+        for_post$trans <- "none"
       }
-      new_for_post <- c(for_post, trans = try_other_trans)
-      temp <- do.call(gp_postsim, c(new_for_post, list(data = data,
-                                                       thresh = u)))
+      temp <- do.call(gp_postsim, c(for_post, list(data = data, thresh = u)))
     }
     # Simulate from the bin-GP posterior after removal of the maximum value
     temp_rm <- try(do.call(gp_postsim, c(for_post, list(data = data_rm,
                                                         thresh = u))),
                    silent = TRUE)
     if (inherits(temp_rm, "try-error")) {
-      if (is.null(cv_control$trans) || cv_control == "none") {
-        try_other_trans <- "BC"
+      if (is.null(for_post$trans) || for_post$trans == "none") {
+        for_post$trans <- "BC"
       } else {
-        try_other_trans <- "none"
+        for_post$trans <- "none"
       }
-      new_for_post <- c(for_post, trans = try_other_trans)
-      temp_rm <- do.call(gp_postsim, c(new_for_post, list(data = data_rm,
-                                                          thresh = u)))
+      temp_rm <- do.call(gp_postsim, c(for_post, list(data = data_rm,
+                                                      thresh = u)))
     }
     # Combine binomial and GP posterior simulated values.
     theta <- cbind(temp$bin_sim_vals, temp$sim_vals)

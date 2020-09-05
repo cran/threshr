@@ -1,3 +1,10 @@
+diag_pos <- function(x) {
+  # Diagonal elements of a matrix, returning NA for any negative values
+  y <- diag(x)
+  y[y < 0] <- NA
+  return(y)
+}
+
 # =========================== gp_mle ===========================
 
 gp_mle <- function(gp_data) {
@@ -9,7 +16,7 @@ gp_mle <- function(gp_data) {
   #
   # Grimshaw, S. D. (1993) Computing Maximum Likelihood Estimates
   #   for the Generalized Pareto Distribution.  Technometrics, 35(2), 185-191.
-  #   and Computing (1991) 1, 129-133. http://dx.doi.org/10.1007/BF01889987.
+  #   and Computing (1991) 1, 129-133. https://doi.org/10.1007/BF01889987.
   #
   # Args:
   #   gp_data : A numeric vector containing positive values, assumed to be a
@@ -21,7 +28,7 @@ gp_mle <- function(gp_data) {
   #     nllh : A numeric scalar.  The negated log-likelihood at the MLE.
   #
   # Call Grimshaw (1993) function, note: k is -xi, a is sigma
-  pjn <- revdbayes:::grimshaw_gp_mle(gp_data)
+  pjn <- revdbayes::grimshaw_gp_mle(gp_data)
   temp <- list()
   temp$mle <- c(pjn$a, -pjn$k)  # mle for (sigma,xi)
   sc <- rep(temp$mle[1], length(gp_data))
@@ -29,7 +36,7 @@ gp_mle <- function(gp_data) {
   temp$nllh <- sum(log(sc)) + sum(log(1 + xi * gp_data / sc) * (1 / xi + 1))
   gp_info <- gp_obs_info(temp$mle, gp_data)
   temp$cov <- solve(gp_info)
-  temp$se <- sqrt(diag(temp$cov))
+  temp$se <- sqrt(diag_pos(temp$cov))
   return(temp)
 }
 

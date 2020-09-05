@@ -23,7 +23,7 @@
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{http://dx.doi.org/10.1111/rssc.12159}
+#'   \url{https://doi.org/10.1111/rssc.12159}
 #'
 #' @seealso The packages \code{\link[revdbayes]{revdbayes}} and
 #'   \code{\link[rust]{rust}}.
@@ -32,12 +32,14 @@
 #' @docType package
 #' @name threshr
 #' @import methods
+#' @importFrom stats predict
+#' @importFrom graphics plot
 NULL
 
 #' Storm peak significant wave heights from the Gulf of Mexico
 #'
 #' A numeric vector containing 315 hindcasts of storm peak significant wave
-#' heights, metres, from 1900 to 2005 at an unnamed location in the Gulf
+#' heights, in metres, from 1900 to 2005 at an unnamed location in the Gulf
 #' of Mexico.
 #'
 #' @format A vector containing 315 observations.
@@ -53,7 +55,8 @@ NULL
 #' Storm peak significant wave heights from the North Sea
 #'
 #' A numeric vector containing 628 hindcasts of storm peak significant wave
-#' heights, metres, from 1964 to 1995 at an unnamed location in the North Sea.
+#' heights, in metres, from 1964 to 1995 at an unnamed location in the North
+#' Sea.
 #'
 #' @format A vector containing 628 observations.
 #' @source Oceanweather Inc. (1995) NEXT -- North Sea hindcast study.

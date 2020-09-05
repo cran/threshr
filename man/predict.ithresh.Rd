@@ -4,13 +4,21 @@
 \alias{predict.ithresh}
 \title{Predictive inference for the largest value observed in N years.}
 \usage{
-\method{predict}{ithresh}(object, npy = NULL, n_years = 100,
-  which_u = c("best", "all"), which_v = 1L, u_prior = rep(1,
-  length(object$u_vec)), type = c("p", "d", "q", "i", "r"), x = NULL,
-  ...)
+\method{predict}{ithresh}(
+  object,
+  npy = NULL,
+  n_years = 100,
+  which_u = c("best", "all"),
+  which_v = 1L,
+  u_prior = rep(1, length(object$u_vec)),
+  type = c("p", "d", "q", "i", "r"),
+  hpd = FALSE,
+  x = NULL,
+  ...
+)
 }
 \arguments{
-\item{object}{An object of class "ithresh", a result of a call to
+\item{object}{An object of class \code{"ithresh"}, a result of a call to
 \code{\link{ithresh}}.}
 
 \item{npy}{A numeric scalar. The mean number of observations per year
@@ -73,11 +81,15 @@ validation thresholds in \code{object$v_vec}.}
   \item "p" for the predictive distribution function,
   \item "d" for the predictive density function,
   \item "q" for the predictive quantile function,
-  \item "i" for predictive intervals,
+  \item "i" for predictive intervals (see \code{...} to set \code{level}),
   \item "r" for random generation from the predictive distribution.
 }
   If \code{which_u = "all"} then only \code{type = "p"} or \code{type = "d"}
   are allowed.}
+
+\item{hpd}{A logical scalar.  The argument \code{hpd} of
+\code{\link[revdbayes]{predict.evpost}}. Only relevant if
+\code{type = "i"}.}
 
 \item{x}{A numeric vector.  The argument \code{x} of
 \code{\link[revdbayes]{predict.evpost}}.  In the current context this
@@ -86,8 +98,12 @@ must be a vector (not a matrix, as suggested by the documentation of
 then a default value is set within
 \code{\link[revdbayes]{predict.evpost}}.}
 
-\item{...}{Additional optional arguments. At present no optional arguments
-are used.}
+\item{...}{Additional arguments to be passed to
+\code{\link[revdbayes]{predict.evpost}}.  In particular:
+\code{level}, which can be used to set (multiple) levels
+for predictive intervals when \code{type = "i"};
+\code{lower_tail} (relevant when \code{type = "p"} or \code{"q"}) and
+\code{log} (relevant when \code{type = "d"}).}
 }
 \value{
 An list object of class "ithreshpred" with a similar structure to
@@ -98,8 +114,11 @@ An list object of class "ithreshpred" with a similar structure to
   \code{which_v} and the index \code{best_u} in
   \code{u_vec = object$u_vec} of the best training threshold based on
   the value of \code{which_v}.
+  It also contains the value of the Box-Cox transformation parameter
+  \code{lambda}.  This will always be equal to 1 if \code{object} was
+  returned from \code{ithresh}.
 
-  If \code{which_u == "all"} then
+  If \code{which_u = "all"} then
 \itemize{
   \item the list also contains the \emph{posterior threshold weights}
     in component \code{post_thresh_wts}
@@ -113,7 +132,7 @@ An list object of class "ithreshpred" with a similar structure to
 }
 }
 \description{
-\code{predict} method for class "ithresh".  Predictive inferences can
+\code{predict} method for class \code{"ithresh"}.  Predictive inferences can
 either be based on a \emph{single training threshold} or using a weighted
 average of inferences over \emph{multiple training thresholds}.  A single
 threshold may chosen to be the best performing threshold, as judged by the
@@ -156,6 +175,11 @@ plot(best_p)
 best_d <- predict(gom_cv, type = "d", n_years = c(100, 1000))
 plot(best_d)
 
+# Predictive intervals
+best_i <- predict(gom_cv, n_years = c(100, 1000), type = "i", hpd = TRUE,
+                  level = c(95, 99))
+plot(best_i, which_int = "both")
+
 # See which threshold was used
 summary(gom_cv)
 
@@ -175,7 +199,7 @@ Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   with application to ocean storm severity.
   \emph{Journal of the Royal Statistical Society Series C: Applied
   Statistics}, \strong{66}(1), 93-120.
-  \url{http://dx.doi.org/10.1111/rssc.12159}
+  \url{https://doi.org/10.1111/rssc.12159}
 }
 \seealso{
 \code{\link{ithresh}} for threshold selection in the i.i.d. case

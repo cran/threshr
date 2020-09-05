@@ -4,8 +4,15 @@
 \alias{stability}
 \title{Generalized Pareto parameter estimate stability}
 \usage{
-stability(data, u_vec, prof = FALSE, conf = 95, mult = 1:2,
-  plot_prof = FALSE, ...)
+stability(
+  data,
+  u_vec,
+  prof = FALSE,
+  conf = 95,
+  mult = 1:2,
+  plot_prof = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{A numeric vector of observations.}
@@ -73,7 +80,7 @@ to produce a crude graphical diagnostic for threshold choice.
 For each threshold in \code{u_vec} a GP model is fitted by maximum
   likelihood estimation to the threshold excesses, i.e. the amounts
   by which the data exceed that threshold.  The MLEs of the GP shape
-  parameter $\eqn{\xi}$ and approximate \code{conf}\% confidence intervals
+  parameter \eqn{\xi} and approximate \code{conf}\% confidence intervals
   for \eqn{\xi} are stored for plotting (by \code{\link{plot.stability}})
   to produce a simple graphical diagnostic to inform threshold selection.
   This plot is used to choose a threshold above which the underlying GP
@@ -95,7 +102,7 @@ plot(gom_stab)
 \references{
 Coles, S. G. (2001) \emph{An Introduction to Statistical
   Modeling of Extreme Values}, Springer-Verlag, London.
-  \url{http://dx.doi.org/10.1007/978-1-4471-3675-0_3}
+  \url{https://doi.org/10.1007/978-1-4471-3675-0_3}
 }
 \seealso{
 \code{\link{ithresh}} for threshold selection in the i.i.d. case

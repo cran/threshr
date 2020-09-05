@@ -37,7 +37,7 @@ set at sample quantiles of  \code{data} using
     See the \strong{revdbayes} vignette
     \href{https://cran.r-project.org/package=revdbayes}{Faster simulation
     using revdbayes} for information about creating
-    a pointer to a C++ function. See also the \strong{Examples} section.
+    a pointer to a C++ function.  See also the \strong{Examples} section.
 
     If the user supplies and R function then \code{\link{rpost}} will be
     used for posterior simulation, rather than (the faster)
@@ -49,10 +49,11 @@ set at sample quantiles of  \code{data} using
     \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}}.
   \item {\code{h_prior}} {A \emph{list} of further arguments
     (hyperparameters) for the GP prior specified in \code{prior}.}
-  \item {\code{bin_prior}} {A character scalar that chooses an in-built
-    prior for the threshold exceedance probability \eqn{p}, to be passed to
-    the \strong{revdbayes} function \code{\link[revdbayes]{set_bin_prior}}.
-    only relevant if \code{prior == "beta"}.
+  \item {\code{bin_prior}} {A prior for the threshold exceedance probability
+    \eqn{p} to be passed to the \strong{revdbayes} function
+    \code{\link[revdbayes]{set_bin_prior}}.
+    Can either be a character scalar that chooses an in-built prior,
+    or a user_supplied R function.
 
     Default: \code{prior = "jeffreys"}, i.e. Beta(1/2, 1/2).}
   \item {\code{h_bin_prior}} {A \emph{list} of further arguments
@@ -120,8 +121,9 @@ An object (list) of class \code{"ithresh"}, containing the
       \code{n} x \code{length(u_vec)} rows.  The \eqn{j}th block of
       \code{n} rows contains in columns 1-3 the posterior samples of
       the threshold exceedance probability, the GP scale
-      parameter and the GP shape parameter respectively, and in
-      column 4 the value of \eqn{j}.
+      parameter and the GP shape parameter respectively,
+      based on training threshold \code{u_vec[i]},
+      and in column 4 the value of \eqn{j}.
     \item{\code{n}:} A numeric scalar.  The value of \code{n}.
     \item{\code{npy}:} A numeric scalar.  The value of \code{npy}.
     \item{\code{data}:} The argument \code{data} to \code{ithresh}
@@ -134,6 +136,7 @@ An object (list) of class \code{"ithresh"}, containing the
       \code{\link[revdbayes]{rpost_rcpp}}
       (or \code{\link[revdbayes]{rpost}}) was called, including
       any user-supplied arguments to these functions.
+    \item{\code{call:}} The call to \code{ithresh}.
   }
 }
 \description{
@@ -173,7 +176,7 @@ For a given threshold in \code{u_vec}:
 \examples{
 # Note:
 # 1. Smoother plots result from making n larger than the default n = 1000.
-# 2. In the examples below validation thresholds rather higher than is
+# 2. In some examples below validation thresholds rather higher than is
 #    advisable have been used, with far fewer excesses than the minimum of
 #    50 suggested by Jonathan and Ewans (2013).
 
@@ -205,14 +208,18 @@ user_prior <- function(pars, a, min_xi = -1) {
   }
   return(-log(pars[1]) - a * pars[2])
 }
+user_bin_prior <- function(p, ab) {
+  return(stats::dbeta(p, shape1 = ab[1], shape2 = ab[2], log = TRUE))
+}
 gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 2, prior = user_prior,
-                  h_prior = list(a = 0.6))
+                  h_prior = list(a = 0.6), bin_prior = user_bin_prior,
+                  h_bin_prior = list(ab = c(1 / 2, 1 / 2)))
 }
 ## Setting a user-defined (log-)prior (pointer to a) C++ function ----------
 # We make use of a C++ function and function create_prior_xptr() to create
 # the required pointer from the revdbayes package
 
-prior_ptr <- revdbayes:::create_prior_xptr("gp_flat")
+prior_ptr <- revdbayes::create_prior_xptr("gp_flat")
 gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 2, prior = prior_ptr,
                   h_prior = list(min_xi = -1))
 }
@@ -220,19 +227,19 @@ gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 2, prior = prior_ptr,
 Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
   Bayesian extreme value analyses using reference priors
   \emph{Statistica Sinica}, \strong{26}(2), 721--743
-  \url{http://dx.doi.org/10.5705/ss.2014.034}.
+  \url{https://doi.org/10.5705/ss.2014.034}.
 
 Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   Cross-validatory extreme value threshold selection and uncertainty
   with application to ocean storm severity.
   \emph{Journal of the Royal Statistical Society Series C: Applied
   Statistics}, \strong{66}(1), 93-120.
-  \url{http://dx.doi.org/10.1111/rssc.12159}
+  \url{https://doi.org/10.1111/rssc.12159}
 
 Jonathan, P. and Ewans, K. (2013) Statistical modelling
   of extreme ocean environments for marine design : a review.
   \emph{Ocean Engineering}, \strong{62}, 91-109.
-  \url{http://dx.doi.org/10.1016/j.oceaneng.2013.01.004}
+  \url{https://doi.org/10.1016/j.oceaneng.2013.01.004}
 }
 \seealso{
 \code{\link{plot.ithresh}} for the S3 plot method for objects of
