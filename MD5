@@ -1,6 +1,6 @@
-7e2010abab6a5165bc18d96e7ffa2cc1 *DESCRIPTION
+5c34ea0eb05717f7e45cffe6935c5e30 *DESCRIPTION
 b4b8d9bfcdfec9dcc2429e1fbd23e215 *NAMESPACE
-2ed4bc5b57e8ba6eae8a9d1976f54743 *NEWS.md
+ce290110a9fcd9b7954034d04d6b461d *NEWS.md
 31fbba383ee33bdf0c9759a50403d54f *R/gp_mle.R
 29e20cc4ed09f1cd891ce04824a22f56 *R/ithresh.R
 f326a24eb15e61009d1d149d136871a9 *R/ithresh_methods.R
@@ -10,12 +10,12 @@ e6b7ebdcf92c2203a84e5a897ce03869 *R/predictive.R
 4d4bd4c0d27b66703e1702d4908fe093 *R/threshr-internal.R
 49fd844370cd2eb2ce81bbd284da99c3 *R/threshr.R
 85d0506218eb7a3adf799fb3332a6a9c *README.md
-9e022bbd3229aa4ca46a7b2d2f2d0ee1 *build/vignette.rds
+d829d4107196353e22e9d5d7b97842c4 *build/vignette.rds
 f14089f388be04b62f71cdbe01ad79dd *data/gom.rda
 67e0b1f749d4cda6151fe7b474fe2761 *data/ns.rda
 175f3fb333ae6e4700cc7b278a32cafd *inst/doc/threshr-vignette.R
 76441eeb8b44c1258b527ddda3f9a269 *inst/doc/threshr-vignette.Rmd
-c93d33f52dcf27b8b5bb05e9bc5173df *inst/doc/threshr-vignette.html
+676e9adee9715939ce4be34e0222d89f *inst/doc/threshr-vignette.html
 5222eb3d7385af1167135be6b4c616b4 *man/gom.Rd
 539bcfb2fa05bee6eae7b4b241583313 *man/ithresh.Rd
 4007028d899b73d23094480cc141db55 *man/ns.Rd
@@ -29,8 +29,8 @@ ab4d25eb373527216fe0891f8aaa5f21 *man/summary.ithresh.Rd
 9dffbabbf1f825be1b3206c3233c34bf *man/threshr-internal.Rd
 cb12aeb98fe30126d344bd74bc2a39dd *man/threshr.Rd
 3de8418166c4824ef55e107ea5a709a9 *tests/testthat.R
-315c14c3edc11e8cd1fab284a327b5fa *tests/testthat/test-box_cox.R
-cf2f38ffe6752c54eb201490a0c34df0 *tests/testthat/test-inv_box_cox.R
+0fae944788c5149fcbe473889545afcb *tests/testthat/test-box_cox.R
+27055967c7b4f537bf1b7e3e661f7ed5 *tests/testthat/test-inv_box_cox.R
 165ad6165efd5246c9323f81f972316c *tests/testthat/test-ithresh.R
 a3e4e390559613ff396957b0e11c7e55 *tests/testthat/test-plot_and_summary.R
 999358757b83cad545a0ca2aa8e42030 *tests/testthat/test-predict_ithresh.R
