@@ -42,7 +42,7 @@ gp_mle <- function(gp_data) {
 
 # =========================== gp_obs_info ===========================
 
-gp_obs_info <- function(gp_pars, y) {
+gp_obs_info <- function(gp_pars, y, eps = 1e-5, m = 3) {
   # Observed information for the generalized Pareto distribution
   #
   # Calculates the observed information matrix for a random sample \code{y}
@@ -51,18 +51,53 @@ gp_obs_info <- function(gp_pars, y) {
   #
   # Args:
   #   gp_pars : A numeric vector. Parameters sigma and xi of the
-  #   generalized Pareto distribution.
+  #             generalized Pareto distribution.
   #   y       : A numeric vector. A sample of positive data values.
+  #   eps     : A (small, positive) numeric scalar.  If abs(xi) is smaller than
+  #             eps then we approximate the [2, 2] element of the information
+  #             matrix using a Taylor series approximation.
+  #   m       : A non-negative integer.  The order of the polynomial used to
+  #             make this approximation.
   #
   # Returns:
   #   A 2 by 2 numeric matrix.  The observed information matrix.
   #
+  if (eps <= 0) {
+    stop("'eps' must be positive")
+  }
+  if (m < 0) {
+    stop("'m' must be non-negative")
+  }
+  # sigma
   s <- gp_pars[1]
+  # xi
   x <- gp_pars[2]
   i <- matrix(NA, 2, 2)
-  i[1,1] <- -sum((1 - (1 + x) * y * (2 * s + x * y) / (s + x * y) ^ 2) / s ^ 2)
-  i[1,2] <- i[2,1] <- -sum(y * (1 - y / s) / (1 + x * y / s) ^ 2 / s ^ 2)
-  i[2,2] <- sum(2 * log(1 + x * y / s) / x ^ 3 - 2 * y / (s + x * y) / x ^ 2 -
-                  (1 + 1 / x) * y ^ 2 / (s + x * y) ^ 2)
+  i[1, 1] <- -sum((1 - (1 + x) * y * (2 * s + x * y) / (s + x * y) ^ 2) / s ^ 2)
+  i[1, 2] <- i[2, 1] <- -sum(y * (1 - y / s) / (1 + x * y / s) ^ 2 / s ^ 2)
+  # Direct calculation of i22 is unreliable for x close to zero.
+  # If abs(x) < eps then we expand the problematic terms (all but t4 below)
+  # in powers of xi up to xi ^ m. The terms in 1/z and 1/z^2 cancel.
+  z <- x / s
+  t0 <- 1 + z * y
+  t4 <- y ^ 2 / t0 ^ 2
+  if (any(t0 <= 0)) {
+    stop("The log-likelihood is 0 for this combination of data and parameters")
+  }
+  if (abs(x) < eps) {
+    j <- 0:m
+    zy <- z * y
+    sum_fn <- function(zy) {
+      return(sum((-1) ^ j * (j ^ 2 + 3 * j + 2) * zy ^ j / (j + 3)))
+    }
+    tsum <- vapply(zy, sum_fn, 0.0)
+    i[2, 2] <- sum(y ^ 3 * tsum / s ^ 3 - t4 / s ^ 2)
+  } else {
+    t1 <- 2 * log(t0) / z ^ 3
+    t2 <- 2 * y / (z ^ 2 * t0)
+    t3 <- y ^ 2 / (z * t0 ^ 2)
+    i[2, 2] <- sum((t1 - t2 - t3) / s ^ 3 - t4 / s ^ 2)
+  }
+  dimnames(i) <- list(c("sigma[u]", "xi"), c("sigma[u]", "xi"))
   return(i)
 }

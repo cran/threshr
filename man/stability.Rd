@@ -51,7 +51,7 @@ for each threshold.  If \code{FALSE} then nothing is plotted.}
 the profile-likelihood for \eqn{xi} is based.}
 }
 \value{
-An object (list) of class "stability" with components:
+An object (list) of class \code{"stability"} with components:
     \item{ests}{MLEs of the GP shape parameter \eqn{\xi}.}
     \item{ses}{Estimated SEs of the MLEs of \eqn{\xi}.}
     \item{lower}{Lower limit of 100\code{conf}\% confidence intervals
@@ -102,7 +102,7 @@ plot(gom_stab)
 \references{
 Coles, S. G. (2001) \emph{An Introduction to Statistical
   Modeling of Extreme Values}, Springer-Verlag, London.
-  \url{https://doi.org/10.1007/978-1-4471-3675-0_3}
+  \doi{10.1007/978-1-4471-3675-0_3}
 }
 \seealso{
 \code{\link{ithresh}} for threshold selection in the i.i.d. case

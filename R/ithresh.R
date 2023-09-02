@@ -11,9 +11,7 @@
 #' leave-one-out cross-validation in a Bayesian setup.
 #' These models are based on a Generalized Pareto (GP) distribution for
 #' threshold excesses and a binomial model for the probability of threshold
-#' exceedance.  See
-#' \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
-#' for details.
+#' exceedance.  See Northrop et al. (2017) for details.
 #'
 #' @param data  A numeric vector of observations.  Any missing values will
 #'   be removed.  The argument \code{npy} (see below) may be supplied
@@ -45,14 +43,13 @@
 #'     using revdbayes} for information about creating
 #'     a pointer to a C++ function.  See also the \strong{Examples} section.
 #'
-#'     If the user supplies and R function then \code{\link{rpost}} will be
+#'     If the user supplies an R function then \code{\link{rpost}} will be
 #'     used for posterior simulation, rather than (the faster)
 #'     \code{\link{rpost_rcpp}}, regardless of the input value of
 #'     \code{use_rcpp}.
 #'
 #'     Default: \code{prior = "mdi"} with \code{a = 0.6} and \code{min_xi = -1}.
-#'     This particular prior is studied in
-#'     \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}}.
+#'     This particular prior is studied in Northrop et al. (2017).}
 #'   \item {\code{h_prior}} {A \emph{list} of further arguments
 #'     (hyperparameters) for the GP prior specified in \code{prior}.}
 #'   \item {\code{bin_prior}} {A prior for the threshold exceedance probability
@@ -114,11 +111,10 @@
 #'   \item {the ability of this binomial-GP model to predict data
 #'     thresholded at the validation threshold(s) specified by \code{n_v} is
 #'     assessed using leave-one-out cross-validation (the measure of
-#'     this is given in equation (7) of
-#'     \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}).}
+#'     this is given in equation (7) of Northrop et al. (2017).}
 #' }
-#'   See \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
-#'   and the introductory threshr vignette for further details and examples.
+#'   See Northrop et al. (2017) and the introductory threshr vignette for
+#'   further details and examples.
 #' @return An object (list) of class \code{"ithresh"}, containing the
 #'   components
 #'   \itemize{
@@ -225,17 +221,17 @@
 #' @references Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
 #'   Bayesian extreme value analyses using reference priors
 #'   \emph{Statistica Sinica}, \strong{26}(2), 721--743
-#'   \url{https://doi.org/10.5705/ss.2014.034}.
+#'   \doi{10.5705/ss.2014.034}.
 #' @references Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{https://doi.org/10.1111/rssc.12159}
+#'   \doi{10.1111/rssc.12159}
 #' @references Jonathan, P. and Ewans, K. (2013) Statistical modelling
 #'   of extreme ocean environments for marine design : a review.
 #'   \emph{Ocean Engineering}, \strong{62}, 91-109.
-#'   \url{https://doi.org/10.1016/j.oceaneng.2013.01.004}
+#'   \doi{10.1016/j.oceaneng.2013.01.004}
 #' @export
 ithresh <- function(data, u_vec, ..., n_v = 1, npy = NULL, use_rcpp = TRUE) {
   # Record the call for later use

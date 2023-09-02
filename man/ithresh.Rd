@@ -39,14 +39,13 @@ set at sample quantiles of  \code{data} using
     using revdbayes} for information about creating
     a pointer to a C++ function.  See also the \strong{Examples} section.
 
-    If the user supplies and R function then \code{\link{rpost}} will be
+    If the user supplies an R function then \code{\link{rpost}} will be
     used for posterior simulation, rather than (the faster)
     \code{\link{rpost_rcpp}}, regardless of the input value of
     \code{use_rcpp}.
 
     Default: \code{prior = "mdi"} with \code{a = 0.6} and \code{min_xi = -1}.
-    This particular prior is studied in
-    \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}}.
+    This particular prior is studied in Northrop et al. (2017).}
   \item {\code{h_prior}} {A \emph{list} of further arguments
     (hyperparameters) for the GP prior specified in \code{prior}.}
   \item {\code{bin_prior}} {A prior for the threshold exceedance probability
@@ -149,9 +148,7 @@ fitted using each of a user-supplied set of thresholds is assessed using
 leave-one-out cross-validation in a Bayesian setup.
 These models are based on a Generalized Pareto (GP) distribution for
 threshold excesses and a binomial model for the probability of threshold
-exceedance.  See
-\href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
-for details.
+exceedance.  See Northrop et al. (2017) for details.
 }
 \details{
 For a given threshold in \code{u_vec}:
@@ -167,11 +164,10 @@ For a given threshold in \code{u_vec}:
   \item {the ability of this binomial-GP model to predict data
     thresholded at the validation threshold(s) specified by \code{n_v} is
     assessed using leave-one-out cross-validation (the measure of
-    this is given in equation (7) of
-    \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}).}
+    this is given in equation (7) of Northrop et al. (2017).}
 }
-  See \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
-  and the introductory threshr vignette for further details and examples.
+  See Northrop et al. (2017) and the introductory threshr vignette for
+  further details and examples.
 }
 \examples{
 # Note:
@@ -227,19 +223,19 @@ gom_cv <- ithresh(data = gom, u_vec = u_vec_gom, n_v = 2, prior = prior_ptr,
 Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
   Bayesian extreme value analyses using reference priors
   \emph{Statistica Sinica}, \strong{26}(2), 721--743
-  \url{https://doi.org/10.5705/ss.2014.034}.
+  \doi{10.5705/ss.2014.034}.
 
 Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   Cross-validatory extreme value threshold selection and uncertainty
   with application to ocean storm severity.
   \emph{Journal of the Royal Statistical Society Series C: Applied
   Statistics}, \strong{66}(1), 93-120.
-  \url{https://doi.org/10.1111/rssc.12159}
+  \doi{10.1111/rssc.12159}
 
 Jonathan, P. and Ewans, K. (2013) Statistical modelling
   of extreme ocean environments for marine design : a review.
   \emph{Ocean Engineering}, \strong{62}, 91-109.
-  \url{https://doi.org/10.1016/j.oceaneng.2013.01.004}
+  \doi{10.1016/j.oceaneng.2013.01.004}
 }
 \seealso{
 \code{\link{plot.ithresh}} for the S3 plot method for objects of

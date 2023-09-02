@@ -1,3 +1,13 @@
+# threshr 1.0.4
+
+## Bug fixes and minor improvements
+
+* Create the help file for the package correctly, with alias threshr-package.
+
+* Activated 3rd edition of the `testthat` package
+
+* README.md: Used app.codecov.io as base for codecov link.
+
 # threshr 1.0.3
 
 ## Bug fixes and minor improvements
